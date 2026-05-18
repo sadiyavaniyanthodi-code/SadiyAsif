@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asif Saheer & Sadiya — Nikkah Invitation</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Amiri:ital,wght@0,400;0,700;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoT0bfjgce4Cy50KylIm51SpBCWKFi_wQ",
+    authDomain: "sadiyasif-rsvp.firebaseapp.com",
+    databaseURL: "https://sadiyasif-rsvp-default-rtdb.firebaseio.com",
+    projectId: "sadiyasif-rsvp",
+    storageBucket: "sadiyasif-rsvp.firebasestorage.app",
+    messagingSenderId: "710047324784",
+    appId: "1:710047324784:web:0f67bea8e2f8f5bd15f2b5",
+    measurementId: "G-8R6D9QQQ7T"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const rsvpCol = collection(db, "rsvps");
+
+  window._db = db;
+  window._rsvpCol = rsvpCol;
+  window._addDoc = addDoc;
+  window._getDocs = getDocs;
+  window._deleteDoc = deleteDoc;
+  window._doc = doc;
+  window._query = query;
+  window._orderBy = orderBy;
+  window._onSnapshot = onSnapshot;
+  window._firebaseReady = true;
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
@@ -952,7 +982,19 @@
 </div>
 
 <script>
-  // ── IN-MEMORY RSVP STORE ──
+  // ── FIREBASE WAIT HELPER ──
+  function waitForFirebase() {
+    return new Promise((resolve, reject) => {
+      let tries = 0;
+      const check = () => {
+        if (window._firebaseReady && window._addDoc && window._rsvpCol) resolve();
+        else if (tries++ < 40) setTimeout(check, 200);
+        else reject(new Error('Firebase did not load in time'));
+      };
+      check();
+    });
+  }
+
   let rsvpStore = [];
 
   // SVG HEART helper
@@ -1084,7 +1126,7 @@
   };
 
   // SUBMIT RSVP
-  window.submitRSVP = function() {
+  window.submitRSVP = async function() {
     const name      = document.getElementById('guestName').value.trim();
     const count     = document.getElementById('guestCount').value;
     const btn       = document.getElementById('rsvpBtn');
@@ -1110,39 +1152,41 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    // Save to in-memory store
-    const now = new Date();
-    const timeStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}) + ' ' +
-      now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    try {
+      await waitForFirebase();
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}) + ' ' +
+        now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
 
-    rsvpStore.unshift({
-      id: Date.now().toString(),
-      name,
-      attending,
-      count: attending ? parseInt(count) : 0,
-      time: timeStr,
-      timestamp: now.toISOString()
-    });
+      await window._addDoc(window._rsvpCol, {
+        name,
+        attending,
+        count: attending ? parseInt(count) : 0,
+        time: timeStr,
+        timestamp: now.toISOString()
+      });
 
-    // Reset form to initial state
-    document.getElementById('guestName').value = '';
-    document.getElementById('guestCount').value = '';
-    document.getElementById('sadNoteWrap').classList.remove('visible');
-    document.getElementById('nameWrap').classList.add('collapsed');
-    document.getElementById('guestCountWrap').classList.add('collapsed');
-    document.getElementById('btnYes').className = 'attend-btn';
-    document.getElementById('btnNo').className  = 'attend-btn';
-    attendanceChoice = 'yes';
+      // Reset form to initial state
+      document.getElementById('guestName').value = '';
+      document.getElementById('guestCount').value = '';
+      document.getElementById('sadNoteWrap').classList.remove('visible');
+      document.getElementById('nameWrap').classList.add('collapsed');
+      document.getElementById('guestCountWrap').classList.add('collapsed');
+      document.getElementById('btnYes').className = 'attend-btn';
+      document.getElementById('btnNo').className  = 'attend-btn';
+      attendanceChoice = 'yes';
 
-    if (attending) {
-      showToast('joy', '✦ &nbsp; Jazakallah Khair — we cannot wait to see you!');
-      spawnHearts(btn);
-    }
+      if (attending) {
+        showToast('joy', '✦ &nbsp; Jazakallah Khair — we cannot wait to see you!');
+        spawnHearts(btn);
+      }
 
-    setTimeout(() => {
+    } catch(e) {
+      alert('Could not save your response. Please check your connection and try again.\n\nError: ' + e.message);
+    } finally {
       btn.disabled = false;
       btn.textContent = 'Confirm';
-    }, 600);
+    }
   };
 
   // TOAST
@@ -1196,14 +1240,26 @@
 
   // ADMIN PANEL
   let adminFilter = 'all';
+  let unsubscribe = null;
 
-  window.openAdmin = function() {
+  window.openAdmin = async function() {
     document.getElementById('adminPanel').style.display = 'block';
-    renderAdmin();
+    document.getElementById('adminRows').innerHTML = '<div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">Loading…</div>';
+    try {
+      await waitForFirebase();
+      const q = window._query(window._rsvpCol, window._orderBy('timestamp', 'desc'));
+      unsubscribe = window._onSnapshot(q, (snapshot) => {
+        rsvpStore = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdmin();
+      });
+    } catch(e) {
+      document.getElementById('adminRows').innerHTML = `<div style="padding:2rem;text-align:center;color:#b07a85;font-size:14px;">Could not load data: ${e.message}</div>`;
+    }
   };
 
   window.closeAdmin = function() {
     document.getElementById('adminPanel').style.display = 'none';
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
   };
 
   window.setAdminFilter = function(f) {
@@ -1275,10 +1331,12 @@
     a.click();
   };
 
-  window.clearAll = function() {
+  window.clearAll = async function() {
     if (!confirm('Clear all RSVP data? This cannot be undone.')) return;
-    rsvpStore = [];
-    renderAdmin();
+    await waitForFirebase();
+    for (const g of rsvpStore) {
+      await window._deleteDoc(window._doc(window._db, 'rsvps', g.id));
+    }
   };
 
   // HEART BURST on happy submit
