@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asif Saheer & Sadiya — Nikkah Invitation</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Amiri:ital,wght@0,400;0,700;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+
+<!-- ✅ STEP 3: Firebase SDKs (no change needed here) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoT0bfjgce4Cy50KylIm51SpBCWKFi_wQ",
+    authDomain: "sadiyasif-rsvp.firebaseapp.com",
+    databaseURL: "https://sadiyasif-rsvp-default-rtdb.firebaseio.com",
+    projectId: "sadiyasif-rsvp",
+    storageBucket: "sadiyasif-rsvp.firebasestorage.app",
+    messagingSenderId: "710047324784",
+    appId: "1:710047324784:web:0f67bea8e2f8f5bd15f2b5",
+    measurementId: "G-8R6D9QQQ7T"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const rsvpCol = collection(db, "rsvps");
+
+  // Expose to window so inline onclick handlers can use them
+  window._db = db;
+  window._rsvpCol = rsvpCol;
+  window._addDoc = addDoc;
+  window._getDocs = getDocs;
+  window._deleteDoc = deleteDoc;
+  window._doc = doc;
+  window._query = query;
+  window._orderBy = orderBy;
+  window._onSnapshot = onSnapshot;
+  window._firebaseReady = true;
+</script>
+
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,31 +64,30 @@
     cursor: default;
   }
 
- .petal {
-  position: absolute;
-  top: -60px;
-  border-radius: 150% 0 150% 0;
-  animation: petalFall linear infinite;
-  opacity: 0;
-}
+  .petal {
+    position: absolute;
+    top: -60px;
+    border-radius: 150% 0 150% 0;
+    animation: petalFall linear infinite;
+    opacity: 0;
+  }
 
-.heart-fall {
-  position: absolute;
-  top: -60px;
-  font-size: 16px;
-  animation: petalFall linear infinite;
-  opacity: 0;
-  line-height: 1;
-}
+  .heart-fall {
+    position: absolute;
+    top: -60px;
+    font-size: 16px;
+    animation: petalFall linear infinite;
+    opacity: 0;
+    line-height: 1;
+  }
 
-@keyframes petalFall {
-  0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
-  5%   { opacity: 0.75; }
-  90%  { opacity: 0.5; }
-  100% { transform: translateY(110vh) rotate(720deg) translateX(80px); opacity: 0; }
-}
+  @keyframes petalFall {
+    0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+    5%   { opacity: 0.75; }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(110vh) rotate(720deg) translateX(80px); opacity: 0; }
+  }
 
-  /* ── STARS / PARTICLES ── */
   .star {
     position: fixed;
     border-radius: 50%;
@@ -70,7 +103,6 @@
     50% { opacity: 0.4; transform: scale(1.2); }
   }
 
-  /* ── MAIN WRAPPER ── */
   .page {
     position: relative;
     z-index: 1;
@@ -81,7 +113,6 @@
     padding: 3rem 1rem 5rem;
   }
 
-  /* ── CARD ── */
   .card {
     background: linear-gradient(160deg, #fffdf8 0%, #fdf5ec 50%, #faf0e6 100%);
     border: 1px solid #ddc9b0;
@@ -101,7 +132,6 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* double-rule border inset */
   .card::before {
     content: '';
     position: absolute;
@@ -119,7 +149,6 @@
     z-index: 10;
   }
 
-  /* ── HEADER BAND ── */
   .header-band {
     background: linear-gradient(135deg, #5c2d20, #8a4030, #5c2d20);
     padding: 2.5rem 2rem 2rem;
@@ -157,10 +186,7 @@
     animation: fadeUp 1s ease 1s forwards;
   }
 
-  /* ── BODY ── */
-  .body {
-    padding: 2.5rem 2.5rem 2rem;
-  }
+  .body { padding: 2.5rem 2.5rem 2rem; }
 
   .ornament {
     font-size: 22px;
@@ -266,24 +292,22 @@
     animation: shimmer 3s ease 2.5s infinite;
   }
 
-  @keyframes shimmer {
-    to { left: 200%; }
-  }
+  @keyframes shimmer { to { left: 200%; } }
 
-  /* ── DETAILS ── */
   .details-row {
     display: grid;
     grid-template-columns: 1fr 1px 1fr;
     background: var(--cream-dark);
-    margin: 0 -2.5rem;
+    width: 100%;
+    margin: 0;
     padding: 1.5rem 2.5rem;
     opacity: 0;
     animation: fadeUp 0.8s ease 1.8s forwards;
     margin-bottom: 0;
+    box-sizing: border-box;
   }
 
   .detail-col { padding: 0 1rem; }
-
   .detail-sep { background: #d4c0aa; align-self: stretch; }
 
   .detail-label {
@@ -296,20 +320,17 @@
     margin-bottom: 7px;
   }
 
-  .detail-val {
-    font-size: 18px;
-    color: var(--ink);
-    line-height: 1.4;
-  }
+  .detail-val { font-size: 18px; color: var(--ink); line-height: 1.4; }
 
-  /* ── VENUE ── */
   .venue-block {
     background: var(--cream-dark);
     padding: 1.4rem 2.5rem;
-    margin: 0 -2.5rem 1.8rem;
+    width: 100%;
+    margin: 0 0 1.8rem 0;
     border-top: 0.5px solid #e0cbb8;
     opacity: 0;
     animation: fadeUp 0.8s ease 1.9s forwards;
+    box-sizing: border-box;
   }
 
   .venue-label {
@@ -321,11 +342,7 @@
     margin-bottom: 6px;
   }
 
-  .venue-name {
-    font-size: 22px;
-    color: var(--ink);
-    margin-bottom: 3px;
-  }
+  .venue-name { font-size: 22px; color: var(--ink); margin-bottom: 3px; }
 
   .venue-addr {
     font-family: 'Jost', sans-serif;
@@ -335,7 +352,6 @@
     letter-spacing: 1px;
   }
 
-  /* ── COUNTDOWN ── */
   .countdown-section {
     margin-bottom: 2rem;
     opacity: 0;
@@ -351,11 +367,7 @@
     margin-bottom: 1rem;
   }
 
-  .countdown-grid {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-  }
+  .countdown-grid { display: flex; justify-content: center; gap: 8px; }
 
   .countdown-box {
     background: linear-gradient(160deg, var(--cream-dark), #efe4d8);
@@ -385,23 +397,22 @@
     margin-top: 4px;
   }
 
-  /* countdown flip animation */
   @keyframes flipNum {
     0% { transform: translateY(-10px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
   }
-
   .flip { animation: flipNum 0.3s ease forwards; }
 
-  /* ── QURAN ── */
   .quran-section {
     background: linear-gradient(135deg, #5c2d20 0%, #8a4030 50%, #5c2d20 100%);
-    margin: 0 -2.5rem;
-    padding: 2rem 2.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 2rem 1.5rem;
     position: relative;
     overflow: hidden;
     opacity: 0;
     animation: fadeUp 0.8s ease 2.1s forwards;
+    box-sizing: border-box;
   }
 
   .quran-section::before {
@@ -413,22 +424,29 @@
 
   .quran-ar {
     font-family: 'Amiri', serif;
-    font-size: 20px;
+    font-size: 18px;
     color: #f0ddb0;
     direction: rtl;
     line-height: 2;
     margin-bottom: 1rem;
     text-shadow: 0 0 15px rgba(240,221,176,0.2);
     position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: 100%;
+    text-align: center;
   }
 
   .quran-trans {
     font-style: italic;
-    font-size: 17px;
+    font-size: 15px;
     color: rgba(240,221,176,0.75);
     line-height: 1.8;
     position: relative;
     text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .quran-ref {
@@ -441,7 +459,6 @@
     position: relative;
   }
 
-  /* ── RSVP ── */
   .rsvp-section {
     padding: 2rem 0 0;
     opacity: 0;
@@ -457,10 +474,7 @@
     margin-bottom: 1.4rem;
   }
 
-  .form-field {
-    margin-bottom: 10px;
-    position: relative;
-  }
+  .form-field { margin-bottom: 10px; position: relative; }
 
   .form-field input,
   .form-field select {
@@ -504,24 +518,8 @@
   }
 
   .rsvp-btn:hover { opacity: 0.88; }
+  .rsvp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .rsvp-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 0; height: 0;
-    background: rgba(255,255,255,0.15);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s, opacity 0.5s;
-    opacity: 0;
-  }
-
-  .rsvp-btn:active::after {
-    width: 200px; height: 200px; opacity: 0;
-  }
-
-  /* ── SUCCESS TOAST ── */
   .toast {
     position: fixed;
     bottom: 30px;
@@ -540,79 +538,8 @@
     box-shadow: 0 10px 40px rgba(92,45,32,0.35);
   }
 
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ── GUEST LIST ── */
-  .guest-list {
-    margin-top: 1.5rem;
-    display: none;
-    text-align: left;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards;
-  }
-
-  .guest-list.visible { display: block; }
-
-  .gl-header {
-    font-family: 'Jost', sans-serif;
-    font-size: 8px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 0.8rem;
-  }
-
-  .gl-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px 14px;
-    border-bottom: 0.5px solid #edd8c4;
-    animation: slideIn 0.4s ease forwards;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-8px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  .gl-name { font-size: 15px; color: var(--ink); font-style: italic; }
-
-  .gl-badge {
-    background: var(--rose-light);
-    color: var(--rose-dark);
-    font-family: 'Jost', sans-serif;
-    font-size: 10px;
-    padding: 3px 10px;
-    letter-spacing: 1px;
-  }
-
-  .gl-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--cream-dark);
-    font-family: 'Jost', sans-serif;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--ink-light);
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
-
-  .total-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    color: var(--rose-dark);
-    font-style: italic;
-    line-height: 1;
-  }
-
-  /* ── FOOTER ── */
   .footer {
     padding: 2rem 2.5rem 2.5rem;
     text-align: center;
@@ -635,7 +562,6 @@
     line-height: 1.8;
   }
 
-  /* ── FLOATING HEARTS ── */
   .heart-burst {
     position: fixed;
     pointer-events: none;
@@ -650,13 +576,11 @@
     100% { opacity: 0; transform: translateY(-80px) scale(0.5); }
   }
 
-  /* ── UTILS ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--cream); }
   ::-webkit-scrollbar-thumb { background: var(--rose-light); }
@@ -664,37 +588,26 @@
 </head>
 <body>
 
-<!-- floating petals -->
 <div class="petals-canvas" id="petalsCanvas"></div>
-
-<!-- twinkling stars -->
 <div id="starsContainer"></div>
-
-<!-- toast -->
 <div class="toast" id="toast">✿ &nbsp; Jazakallah Khair — see you there!</div>
 
 <div class="page">
   <div class="card" id="mainCard">
 
-    <!-- header -->
     <div class="header-band">
       <div class="bismillah-ar">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
       <div class="bismillah-trans">In the name of Allah, the Most Gracious, the Most Merciful</div>
     </div>
 
-    <!-- body -->
     <div class="body">
-
       <span class="ornament">✦ ✧ ✦</span>
-
       <div class="together-label">Together in faith & love</div>
-
       <div class="names">
         <span class="name">Asif Saheer</span>
         <span class="amp">&amp;</span>
         <span class="name">Sadiya</span>
       </div>
-
       <div class="divider" style="animation-delay:1.5s">
         <div class="div-line"></div>
         <div class="div-diamond"></div>
@@ -702,16 +615,13 @@
         <div class="div-diamond"></div>
         <div class="div-line r"></div>
       </div>
-
       <div class="invite-prose">
         Together with their beloved families,<br>
         joyfully request the honour of your presence<br>
         at the celebration of their
       </div>
-
       <div class="nikkah-pill">✦ &nbsp; Nikkah Ceremony &nbsp; ✦</div>
 
-      <!-- details -->
       <div class="details-row">
         <div class="detail-col">
           <div class="detail-label">&nbsp; Date</div>
@@ -730,7 +640,6 @@
         <div class="venue-addr">Kozhichena, Malappuram, Kerala</div>
       </div>
 
-      <!-- countdown -->
       <div class="countdown-section">
         <div class="countdown-label">✦ Counting down to the big day ✦</div>
         <div class="countdown-grid">
@@ -752,21 +661,17 @@
           </div>
         </div>
       </div>
+    </div>
 
-    </div><!-- end .body -->
-
-    <!-- quran verse -->
     <div class="quran-section">
       <div class="quran-ar">وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً</div>
       <div class="quran-trans">"And of His signs is that He created for you from yourselves mates that you may find tranquillity in them; and He placed between you affection and mercy."</div>
       <div class="quran-ref">— Surah Ar-Rum 30:21</div>
     </div>
 
-    <!-- rsvp -->
     <div class="body">
       <div class="rsvp-section">
         <div class="rsvp-title">✦ &nbsp; Kindly fill &nbsp; ✦</div>
-
         <div class="form-field">
           <input type="text" id="guestName" placeholder="Your full name" />
         </div>
@@ -786,27 +691,24 @@
           </select>
         </div>
         <button class="rsvp-btn" id="rsvpBtn" onclick="submitRSVP()">Confirm Attendance</button>
-
       </div>
     </div>
 
-    <!-- footer -->
     <div class="footer">
       <span class="footer-ornament">✦ &nbsp; ✧ &nbsp; ✦</span>
       <div class="footer-msg">
         Your presence will fill our hearts with joy.<br>
         <em>May Allah bless this union.</em>
       </div>
-      <!-- hidden admin trigger — tiny, discreet -->
       <div style="margin-top:2rem;">
         <span id="adminTrigger" onclick="openAdminLogin()" style="font-family:'Jost',sans-serif;font-size:9px;letter-spacing:2px;color:#d4c0aa;cursor:pointer;user-select:none;opacity:0.5;">⚙ host access</span>
       </div>
     </div>
 
-  </div><!-- end .card -->
+  </div>
 </div>
 
-<!-- ── ADMIN LOGIN OVERLAY ── -->
+<!-- ADMIN LOGIN OVERLAY -->
 <div id="adminOverlay" style="display:none;position:fixed;inset:0;background:rgba(30,12,6,0.85);z-index:200;align-items:center;justify-content:center;">
   <div id="adminBox" style="background:linear-gradient(160deg,#fffdf8,#fdf5ec);border:1px solid #ddc9b0;max-width:360px;width:90%;padding:2.5rem 2rem;text-align:center;position:relative;transform:scale(0.9);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);">
     <div style="font-family:'Jost',sans-serif;font-size:9px;letter-spacing:4px;color:#b09080;text-transform:uppercase;margin-bottom:1.4rem;">✦ Host Access ✦</div>
@@ -818,11 +720,9 @@
   </div>
 </div>
 
-<!-- ── ADMIN PANEL OVERLAY ── -->
+<!-- ADMIN PANEL OVERLAY -->
 <div id="adminPanel" style="display:none;position:fixed;inset:0;background:#fdf8f2;z-index:300;overflow-y:auto;">
   <div style="max-width:680px;margin:0 auto;padding:2.5rem 1.5rem 5rem;">
-
-    <!-- top bar -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;border-bottom:0.5px solid #e0cbb8;padding-bottom:1.2rem;">
       <div>
         <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:#3d2518;">Host Dashboard</div>
@@ -831,7 +731,6 @@
       <button onclick="closeAdmin()" style="background:linear-gradient(135deg,#5c2d20,#8a4030);color:#f0ddb0;border:none;padding:8px 18px;font-family:'Jost',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">Close</button>
     </div>
 
-    <!-- stats cards -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem;">
       <div style="background:#fff;border:0.5px solid #e0cbb8;padding:1.2rem;text-align:center;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-style:italic;color:#7a4a55;line-height:1;" id="stat-rsvps">0</div>
@@ -847,16 +746,13 @@
       </div>
     </div>
 
-    <!-- actions row -->
     <div style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;">
       <button onclick="exportCSV()" style="background:none;border:0.5px solid #c9963a;color:#c9963a;padding:8px 18px;font-family:'Jost',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">⬇ Export CSV</button>
       <button onclick="clearAll()" style="background:none;border:0.5px solid #d4a0a8;color:#b07a85;padding:8px 18px;font-family:'Jost',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">✕ Clear All</button>
     </div>
 
-    <!-- search -->
     <input type="text" id="adminSearch" placeholder="Search guest name…" oninput="renderAdmin()" style="width:100%;border:0.5px solid #d4b898;background:#fff;padding:10px 14px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#3d2518;outline:none;margin-bottom:1rem;" />
 
-    <!-- guest table -->
     <div style="background:#fff;border:0.5px solid #e0cbb8;">
       <div style="display:grid;grid-template-columns:2fr 1fr 1.4fr;padding:10px 16px;border-bottom:0.5px solid #e0cbb8;background:#fdf5ec;">
         <span style="font-family:'Jost',sans-serif;font-size:8px;letter-spacing:3px;color:#b09080;text-transform:uppercase;">Name</span>
@@ -864,52 +760,34 @@
         <span style="font-family:'Jost',sans-serif;font-size:8px;letter-spacing:3px;color:#b09080;text-transform:uppercase;">Time</span>
       </div>
       <div id="adminRows">
-        <div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">No RSVPs yet</div>
+        <div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">Loading…</div>
       </div>
     </div>
-
   </div>
-</div>
 </div>
 
 <script>
   // ── PETALS + HEARTS
-const canvas = document.getElementById('petalsCanvas');
-const petalColors = ['#e8c4c8','#d4a0a8','#f0d8dc','#c9a0a8','#e0b8bc','#f5dde0'];
-const heartSymbols = ['♥', '♡', '❤'];
+  const canvas = document.getElementById('petalsCanvas');
+  const petalColors = ['#e8c4c8','#d4a0a8','#f0d8dc','#c9a0a8','#e0b8bc','#f5dde0'];
+  const heartSymbols = ['♥','♡','❤'];
 
-for (let i = 0; i < 22; i++) {
-  const isHeart = i % 4 === 0; // every 4th one is a heart
-
-  const el = document.createElement('div');
-  el.className = isHeart ? 'heart-fall' : 'petal';
-
-  const size = 13 + Math.random() * 18;
-  const duration = 7 + Math.random() * 12;
-  const delay = Math.random() * 10;
-  const left = Math.random() * 100;
-
-  if (isHeart) {
-    el.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
-    el.style.cssText = `
-      left:${left}%;
-      color:${petalColors[Math.floor(Math.random()*petalColors.length)]};
-      font-size:${size}px;
-      animation-duration:${duration}s;
-      animation-delay:${delay}s;
-    `;
-  } else {
-    el.style.cssText = `
-      width:${size}px; height:${size * 1.4}px;
-      background:${petalColors[Math.floor(Math.random()*petalColors.length)]};
-      left:${left}%;
-      animation-duration:${duration}s;
-      animation-delay:${delay}s;
-    `;
+  for (let i = 0; i < 22; i++) {
+    const isHeart = i % 4 === 0;
+    const el = document.createElement('div');
+    el.className = isHeart ? 'heart-fall' : 'petal';
+    const size = 13 + Math.random() * 18;
+    const duration = 7 + Math.random() * 12;
+    const delay = Math.random() * 10;
+    const left = Math.random() * 100;
+    if (isHeart) {
+      el.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+      el.style.cssText = `left:${left}%;color:${petalColors[Math.floor(Math.random()*petalColors.length)]};font-size:${size}px;animation-duration:${duration}s;animation-delay:${delay}s;`;
+    } else {
+      el.style.cssText = `width:${size}px;height:${size*1.4}px;background:${petalColors[Math.floor(Math.random()*petalColors.length)]};left:${left}%;animation-duration:${duration}s;animation-delay:${delay}s;`;
+    }
+    canvas.appendChild(el);
   }
-
-  canvas.appendChild(el);
-}
 
   // ── STARS
   const sc = document.getElementById('starsContainer');
@@ -917,60 +795,41 @@ for (let i = 0; i < 22; i++) {
     const s = document.createElement('div');
     s.className = 'star';
     const sz = 2 + Math.random()*3;
-    s.style.cssText = `
-      width:${sz}px; height:${sz}px;
-      top:${Math.random()*100}vh; left:${Math.random()*100}vw;
-      animation-duration:${2 + Math.random()*4}s;
-      animation-delay:${Math.random()*5}s;
-    `;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}vh;left:${Math.random()*100}vw;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s;`;
     sc.appendChild(s);
   }
 
   // ── COUNTDOWN
   const weddingDate = new Date('2026-07-26T10:00:00');
-
   function updateCountdown() {
-    const now = new Date();
-    const diff = weddingDate - now;
-    if (diff <= 0) {
-      ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
-        document.getElementById(id).textContent = '00';
-      });
-      return;
-    }
-    const days  = Math.floor(diff / 86400000);
-    const hours = Math.floor((diff % 86400000) / 3600000);
-    const mins  = Math.floor((diff % 3600000) / 60000);
-    const secs  = Math.floor((diff % 60000) / 1000);
-
+    const diff = weddingDate - new Date();
+    if (diff <= 0) { ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '00'); return; }
     function set(id, val) {
       const el = document.getElementById(id);
       const padded = String(val).padStart(2,'0');
-      if (el.textContent !== padded) {
-        el.textContent = padded;
-        el.classList.remove('flip');
-        void el.offsetWidth;
-        el.classList.add('flip');
-      }
+      if (el.textContent !== padded) { el.textContent = padded; el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip'); }
     }
-    set('cd-days', days);
-    set('cd-hours', hours);
-    set('cd-mins', mins);
-    set('cd-secs', secs);
+    set('cd-days', Math.floor(diff/86400000));
+    set('cd-hours', Math.floor((diff%86400000)/3600000));
+    set('cd-mins', Math.floor((diff%3600000)/60000));
+    set('cd-secs', Math.floor((diff%60000)/1000));
   }
-
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // ── RSVP
+  // ── ADMIN
   const ADMIN_PASSWORD = 'diyasif2019';
-  let guests = JSON.parse(localStorage.getItem('weddingGuests') || '[]');
+  let cachedGuests = [];
 
-  function saveGuests() {
-    try { localStorage.setItem('weddingGuests', JSON.stringify(guests)); } catch(e) {}
+  // Wait for Firebase to be ready
+  function waitForFirebase(cb, retries = 20) {
+    if (window._firebaseReady) { cb(); }
+    else if (retries > 0) { setTimeout(() => waitForFirebase(cb, retries - 1), 150); }
+    else { console.error('Firebase not loaded'); }
   }
 
-  function submitRSVP() {
+  // ── SUBMIT RSVP → Firebase
+  async function submitRSVP() {
     const name = document.getElementById('guestName').value.trim();
     const count = document.getElementById('guestCount').value;
     const btn = document.getElementById('rsvpBtn');
@@ -979,89 +838,113 @@ for (let i = 0; i < 22; i++) {
       const nf = document.getElementById('guestName');
       nf.style.borderColor = '#b07a85';
       nf.style.boxShadow = '0 0 0 3px rgba(176,122,133,0.15)';
-      setTimeout(() => {
-        nf.style.borderColor = '#d4b898';
-        nf.style.boxShadow = 'none';
-      }, 1800);
+      setTimeout(() => { nf.style.borderColor = '#d4b898'; nf.style.boxShadow = 'none'; }, 1800);
       return;
     }
 
-    const now = new Date();
-    const timeStr = now.toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) + ' ' +
-      now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
 
-    guests.push({ name, count: parseInt(count), time: timeStr });
-    saveGuests();
+    try {
+      await waitForFirebaseAsync();
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('en-GB', {day:'2-digit',month:'short'}) + ' ' +
+        now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
 
-    document.getElementById('guestName').value = '';
-    document.getElementById('guestCount').value = '';
+      await window._addDoc(window._rsvpCol, {
+        name,
+        count: parseInt(count),
+        time: timeStr,
+        timestamp: now.toISOString()
+      });
 
-    showToast();
-    spawnHearts(btn);
+      document.getElementById('guestName').value = '';
+      document.getElementById('guestCount').value = '';
+      showToast();
+      spawnHearts(btn);
+    } catch(e) {
+      alert('Could not save RSVP. Please check your internet and try again.\n\nError: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Confirm Attendance';
+    }
+  }
+
+  function waitForFirebaseAsync() {
+    return new Promise((resolve, reject) => {
+      let tries = 0;
+      const check = () => {
+        if (window._firebaseReady) resolve();
+        else if (tries++ < 20) setTimeout(check, 150);
+        else reject(new Error('Firebase not ready'));
+      };
+      check();
+    });
   }
 
   // ── ADMIN LOGIN
   function openAdminLogin() {
     const overlay = document.getElementById('adminOverlay');
     overlay.style.display = 'flex';
-    setTimeout(() => {
-      const box = document.getElementById('adminBox');
-      box.style.transform = 'scale(1)';
-      box.style.opacity = '1';
-    }, 10);
+    setTimeout(() => { const box = document.getElementById('adminBox'); box.style.transform = 'scale(1)'; box.style.opacity = '1'; }, 10);
     setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
   }
 
   function closeAdminLogin() {
-    const overlay = document.getElementById('adminOverlay');
     const box = document.getElementById('adminBox');
     box.style.transform = 'scale(0.9)';
     box.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    setTimeout(() => { document.getElementById('adminOverlay').style.display = 'none'; }, 300);
     document.getElementById('adminPwInput').value = '';
     document.getElementById('adminErr').textContent = '';
   }
 
   function checkAdmin() {
-    const pw = document.getElementById('adminPwInput').value;
-    if (pw === ADMIN_PASSWORD) {
+    if (document.getElementById('adminPwInput').value === ADMIN_PASSWORD) {
       closeAdminLogin();
       setTimeout(openAdmin, 350);
     } else {
-      const err = document.getElementById('adminErr');
-      err.textContent = 'Incorrect password';
+      document.getElementById('adminErr').textContent = 'Incorrect password';
       const inp = document.getElementById('adminPwInput');
       inp.style.borderColor = '#b07a85';
-      setTimeout(() => {
-        inp.style.borderColor = '#d4b898';
-        err.textContent = '';
-      }, 1800);
+      setTimeout(() => { inp.style.borderColor = '#d4b898'; document.getElementById('adminErr').textContent = ''; }, 1800);
     }
   }
 
-  // ── ADMIN PANEL
-  function openAdmin() {
-    guests = JSON.parse(localStorage.getItem('weddingGuests') || '[]');
+  // ── ADMIN PANEL — load from Firebase
+  let unsubscribe = null;
+
+  async function openAdmin() {
     document.getElementById('adminPanel').style.display = 'block';
-    renderAdmin();
+    document.getElementById('adminRows').innerHTML = '<div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">Loading…</div>';
+
+    await waitForFirebaseAsync();
+
+    // Real-time listener: updates dashboard instantly when anyone RSVPs
+    const q = window._query(window._rsvpCol, window._orderBy('timestamp', 'desc'));
+    unsubscribe = window._onSnapshot(q, (snapshot) => {
+      cachedGuests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAdmin();
+    });
   }
 
   function closeAdmin() {
     document.getElementById('adminPanel').style.display = 'none';
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
   }
 
   function renderAdmin() {
     const q = (document.getElementById('adminSearch').value || '').toLowerCase();
-    const filtered = guests.filter(g => g.name.toLowerCase().includes(q));
+    const filtered = cachedGuests.filter(g => g.name.toLowerCase().includes(q));
     const rows = document.getElementById('adminRows');
 
-    document.getElementById('stat-rsvps').textContent = guests.length;
-    const totalG = guests.reduce((s,g) => s+g.count, 0);
+    document.getElementById('stat-rsvps').textContent = cachedGuests.length;
+    const totalG = cachedGuests.reduce((s,g) => s + g.count, 0);
     document.getElementById('stat-total').textContent = totalG;
-    document.getElementById('stat-avg').textContent = guests.length ? (totalG/guests.length).toFixed(1) : '0';
+    document.getElementById('stat-avg').textContent = cachedGuests.length ? (totalG/cachedGuests.length).toFixed(1) : '0';
 
     if (filtered.length === 0) {
-      rows.innerHTML = `<div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">${guests.length === 0 ? 'No RSVPs yet' : 'No results found'}</div>`;
+      rows.innerHTML = `<div style="padding:2rem;text-align:center;font-style:italic;color:#c0a890;font-size:15px;">${cachedGuests.length === 0 ? 'No RSVPs yet' : 'No results found'}</div>`;
       return;
     }
 
@@ -1075,9 +958,9 @@ for (let i = 0; i < 22; i++) {
   }
 
   function exportCSV() {
-    if (guests.length === 0) return;
+    if (cachedGuests.length === 0) return;
     const header = 'Name,Guests,Time\n';
-    const rows = guests.map(g => `"${g.name}",${g.count},"${g.time||''}"`).join('\n');
+    const rows = cachedGuests.map(g => `"${g.name}",${g.count},"${g.time||''}"`).join('\n');
     const blob = new Blob([header+rows], {type:'text/csv'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1085,10 +968,13 @@ for (let i = 0; i < 22; i++) {
     a.click();
   }
 
-  function clearAll() {
+  async function clearAll() {
     if (!confirm('Clear all RSVP data? This cannot be undone.')) return;
-    guests = [];
-    saveGuests();
+    await waitForFirebaseAsync();
+    for (const g of cachedGuests) {
+      await window._deleteDoc(window._doc(window._db, 'rsvps', g.id));
+    }
+    cachedGuests = [];
     renderAdmin();
   }
 
